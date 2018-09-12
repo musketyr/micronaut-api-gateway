@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Serverless API - Micronaut Functions
+
+Resources:
+  ReportLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.agorapulse.micronaut.agp.ApiGatewayProxyHandler
+      Runtime: java8
+      CodeUri: build/libs/micronaut-1.0-SNAPSHOT.jar
+      MemorySize: 1024
+      Policies: AWSLambdaBasicExecutionRole
+      Timeout: 360
+      Events:
+        AnyRequest:
+          Type: Api
+          Properties:
+            Path: /shipment
+            Method: Any
+      Environment:
+        Variables:
