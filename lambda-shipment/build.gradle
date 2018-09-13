@@ -1,0 +1,65 @@
+import com.amazonaws.services.lambda.model.Runtime
+import jp.classmethod.aws.gradle.lambda.AWSLambdaMigrateFunctionTask
+
+buildscript {
+    repositories {
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.5.RELEASE"
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
+        classpath "jp.classmethod.aws:gradle-aws-plugin:0.38"
+    }
+}
+
+group 'be.drissamri'
+version '1.0-SNAPSHOT'
+
+apply plugin:"io.spring.dependency-management"
+apply plugin:"application"
+apply plugin:"java"
+apply plugin:"net.ltgt.apt-eclipse"
+apply plugin:"net.ltgt.apt-idea"
+
+apply from: '../gradle/lambda.gradle'
+
+apply plugin: 'jp.classmethod.aws.lambda'
+
+dependencyManagement {
+    imports {
+        mavenBom 'io.micronaut:bom:1.0.0.M3'
+    }
+}
+dependencies {
+    annotationProcessor "io.micronaut:inject-java"
+
+    compile "io.micronaut:inject"
+    compile "io.micronaut:runtime"
+    compileOnly "io.micronaut:inject-java"
+
+    runtime "ch.qos.logback:logback-classic:1.2.3"
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile "io.micronaut:inject-java"
+
+}
+
+compileJava.options.compilerArgs += '-parameters'
+compileTestJava.options.compilerArgs += '-parameters'
+
+task deployLambda(type: AWSLambdaMigrateFunctionTask, dependsOn: build, group: 'deploy')  {
+    // these values must always be the same
+    handler = 'com.agorapulse.micronaut.agp.ApiGatewayProxyHandler::handleRequest'
+    runtime = Runtime.Java8
+    zipFile = buildZip.archivePath
+
+    // these values are up to you to reflect you configuration
+    functionName = 'MirconauteApiGateway'
+    role = "arn:aws:iam::281741939716:role/service-role/MicronautExamples" // TODO: change to your role
+    memorySize = 512
+    timeout = 60
+}
+

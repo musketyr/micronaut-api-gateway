@@ -1,2 +1,5 @@
-rootProject.name = 'micronaut'
+rootProject.name = 'micronaut-api-gateway'
+
+include 'lambda-shipment'
+include 'local-server'
 

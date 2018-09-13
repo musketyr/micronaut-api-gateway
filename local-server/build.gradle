@@ -1,0 +1,48 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.5.RELEASE"
+        classpath "com.github.jengelman.gradle.plugins:shadow:2.0.4"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: "application"
+apply plugin: "com.github.johnrengelman.shadow"
+apply plugin:"io.spring.dependency-management"
+
+dependencyManagement {
+    imports {
+        mavenBom 'io.micronaut:bom:1.0.0.M3'
+    }
+}
+
+dependencies {
+    // lambda projects
+    compile project(':lambda-shipment')
+
+    // for mocking of lambda context
+//    compile "com.agorapulse:gru-api-gateway:$gruVersion"
+
+
+    // local netty server
+    compile "io.micronaut:http-server-netty"
+}
+
+
+shadowJar {
+    mergeServiceFiles()
+}
+
+runShadow {
+    // run in dev environment by default
+    systemProperties 'micronaut.environments': 'dev'
+}
+
+// your application class
+mainClassName = "be.drissamri.Application"
